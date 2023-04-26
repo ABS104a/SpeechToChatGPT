@@ -3,8 +3,10 @@ const { Configuration, OpenAIApi } = require("openai");
 const config = require("../config");
 const { default: axios } = require("axios");
 
-const isPromise = (obj) => {
-    return obj instanceof Promise || (obj && typeof obj.then === 'function');
+const executePromise = async (obj) => {
+    if(obj instanceof Promise || (obj && typeof obj.then === 'function')){
+        await obj;
+    };
 }
 
 class ChatGPT {
@@ -49,16 +51,14 @@ class ChatGPT {
 
             for (const line of lines) {
                 const message = line.replace(/^data: /, "");
-                if (message === "[DONE]") {
-                    return;
-                }
+                if (message === "[DONE]") return;
 
                 const json = JSON.parse(message);
                 const word = json.choices[0].delta.content;
                 if (word && observer && typeof observer === 'function') {
                     const promise = observer(word);
                     promise.signal = this.abortController.signal;
-                    if(isPromise(promise)) await promise;
+                    await executePromise(promise);
                 }
             }
         }

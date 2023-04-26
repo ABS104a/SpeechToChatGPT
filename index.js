@@ -17,10 +17,12 @@ const main = async () => {
     const voiceVox = new VoiceVox();
     const vosk = new Vosk();
 
+    let processingFlag = false;
     // 音声入力後の処理
     vosk.subscribe(async (speechText) => {
-        if(validateInputText(speechText) && voiceVox.isIdle()) {
+        if(validateInputText(speechText) && processingFlag == false) {
             console.log(`質問内容: ${speechText}`);
+            processingFlag = true;
             // ChatGPTへの問い合わせ
             let sentence = "";
             console.log('-------------------------------------');
@@ -32,8 +34,13 @@ const main = async () => {
                     sentence = "";
                 }
             });
-            await voiceVox.speech("  "); // 自分の発話を再度拾わないように最後に空白のスピーチを挿入しておく
-            console.log('-------------------------------------');
+            voiceVox.addCallBack(() => {
+                // すべてのトークが終わったあと自分自身の声を拾わないように少し待つ。
+                setTimeout(() => {
+                    processingFlag = false;
+                    console.log('-------------------------------------');
+                }, 1500);
+            });
         }
     });
 }

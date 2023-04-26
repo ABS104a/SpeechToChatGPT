@@ -25,7 +25,13 @@ class VoiceVox {
 
     constructor() {
         this.config = voicevoxConfig;
-        this.playingQueue = async.queue(async (fileName) => await exec(`afplay ${fileName}`));
+        this.playingQueue = async.queue(async (obj) => {
+            if(typeof obj === 'string') {
+                await exec(`afplay ${obj}`);
+            } else if (typeof obj === 'function') {
+                obj();
+            }
+        });
         this.playingQueueCount = 0;
 
         process.on('SIGINT', () => {
@@ -36,29 +42,25 @@ class VoiceVox {
         });
     }
 
-    isIdle() {
-        return this.playingQueue.running() == false;
+    addCallBack(callback) {
+        this.playingQueue.push(callback);
     }
 
     async speech(text) {
-        if (this.playFlag) {
-            console.log("playing voicevox now.");
+        // VOICEVOXでchatGPTからの返答を音声合成
+        const queryRes = await axios.post(`${this.config.serverUrl}/audio_query?speaker=${this.config.speakerIndex}&text="${text}"`);
+        const res = await axios.post(`${this.config.serverUrl}/synthesis?speaker=${this.config.speakerIndex}`, queryRes.data, {
+                responseType: "arraybuffer",
+            });
+        //VOICEBOXで生成した音声データをwavで出力してafplayで再生
+        if(this.playingQueue.idle()) {
+            this.playingQueueCount = 0;
         } else {
-            // VOICEVOXでchatGPTからの返答を音声合成
-            const queryRes = await axios.post(`${this.config.serverUrl}/audio_query?speaker=${this.config.speakerIndex}&text="${text}"`);
-            const res = await axios.post(`${this.config.serverUrl}/synthesis?speaker=${this.config.speakerIndex}`, queryRes.data, {
-                    responseType: "arraybuffer",
-                });
-            //VOICEBOXで生成した音声データをwavで出力してafplayで再生
-            if(this.playingQueue.idle()) {
-                this.playingQueueCount = 0;
-            } else {
-                this.playingQueueCount = this.playingQueueCount + 1;
-            }
-            const fileName = `tmp_voice_${this.playingQueueCount}.wav`;
-            await fs.promises.writeFile(fileName, res.data);
-            this.playingQueue.push(fileName);
+            this.playingQueueCount = this.playingQueueCount + 1;
         }
+        const fileName = `tmp_voice_${this.playingQueueCount}.wav`;
+        await fs.promises.writeFile(fileName, res.data);
+        this.playingQueue.push(fileName);
     }
 }
 module.exports = VoiceVox;
