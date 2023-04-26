@@ -28,7 +28,7 @@ const main = async () => {
             console.log('-------------------------------------');
             await chatGPT.askStream(speechText, async (word) => {
                 sentence += word;
-                if (word == "。" || word == ".") {
+                if (word == "。" || word == "." || word == "！" || word == "\n") {
                     console.log(sentence);
                     await voiceVox.addSpeechQueue(sentence);
                     sentence = "";
