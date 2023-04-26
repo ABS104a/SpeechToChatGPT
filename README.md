@@ -4,6 +4,8 @@
 - VoiceBox (standalone)
 - Vosk (model)
   
+## 動作環境
+M1 Mac Air (2020)
 ## 準備
 1. 依存するLibを取得します。
 ```sh
