@@ -3,7 +3,7 @@ const mic = require("mic");
 
 const VoskConfig = {
     SAMPLE_RATE: 16000,
-    MODEL_PATH: "./vosk-model-small-ja-0.22",
+    MODEL_PATH: "./vosk-model-ja-0.22",
 }
 
 const isPromise = (obj) => {
