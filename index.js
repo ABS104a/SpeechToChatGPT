@@ -30,14 +30,16 @@ const main = async () => {
                 sentence += word;
                 if (word == "。" || word == ".") {
                     console.log(sentence);
-                    await voiceVox.speech(sentence);
+                    await voiceVox.addSpeechQueue(sentence);
                     sentence = "";
                 }
             });
+            if (sentence.length > 0) await voiceVox.addSpeechQueue(sentence);
             voiceVox.addCallBack(() => {
                 // すべてのトークが終わったあと自分自身の声を拾わないように少し待つ。
                 setTimeout(() => {
                     processingFlag = false;
+                    sentence = "";
                     console.log('-------------------------------------');
                 }, 1500);
             });

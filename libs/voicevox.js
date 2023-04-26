@@ -46,7 +46,7 @@ class VoiceVox {
         this.playingQueue.push(callback);
     }
 
-    async speech(text) {
+    async addSpeechQueue(text) {
         // VOICEVOXでchatGPTからの返答を音声合成
         const queryRes = await axios.post(`${this.config.serverUrl}/audio_query?speaker=${this.config.speakerIndex}&text="${text}"`);
         const res = await axios.post(`${this.config.serverUrl}/synthesis?speaker=${this.config.speakerIndex}`, queryRes.data, {
