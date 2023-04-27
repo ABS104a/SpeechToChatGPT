@@ -1,7 +1,6 @@
 
 const { Configuration, OpenAIApi } = require("openai");
 const config = require("../config");
-const { default: axios } = require("axios");
 
 const executePromise = async (obj) => {
     if(obj instanceof Promise || (obj && typeof obj.then === 'function')){
@@ -56,9 +55,7 @@ class ChatGPT {
                 const json = JSON.parse(message);
                 const word = json.choices[0].delta.content;
                 if (word && observer && typeof observer === 'function') {
-                    const promise = observer(word);
-                    promise.signal = this.abortController.signal;
-                    await executePromise(promise);
+                    await executePromise(observer(word));
                 }
             }
         }
