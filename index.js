@@ -33,7 +33,7 @@ const main = async () => {
                     await voiceVox.addSpeechQueue(sentence);
                     sentence = "";
                 }
-            });
+            }, chatGPT.MODELS.gpt35_turbo);
             if (sentence.length > 0) await voiceVox.addSpeechQueue(sentence);
             voiceVox.addCallBack(() => {
                 // すべてのトークが終わったあと自分自身の声を拾わないように少し待つ。

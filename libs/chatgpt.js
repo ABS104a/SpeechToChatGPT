@@ -16,13 +16,23 @@ class ChatGPT {
         });
         this.abortController = new AbortController();
         this.openai = new OpenAIApi(conf);
+
+        this.MODELS = {
+            gpt4: "gpt-4",
+            gpt4_0314: "gpt-4-0314",
+            gpt4_32k: "gpt-4-32k",
+            gpt4_32k_0314: "gpt-4-32k-0314",
+            gpt35_turbo: "gpt-3.5-turbo",
+            gpt35_turbo_0301: "gpt-3.5-turbo-0301"
+        };
+
         process.on('SIGINT', () => {
             console.log("SIGINT_CHATGPT");
             this.abortController.abort();
         });
     }
 
-    async ask(prompt, model = "gpt-3.5-turbo") {
+    async ask(prompt, model = this.MODELS.gpt35_turbo) {
         const result = await this.openai.createChatCompletion({
             model,
             messages: [{role: "user", content: prompt}],
@@ -32,7 +42,7 @@ class ChatGPT {
         return result.data.choices[0].message.content;
     }
 
-    async askStream(prompt, observer, model = "gpt-3.5-turbo") {
+    async askStream(prompt, observer, model = this.MODELS.gpt35_turbo) {
         const result = await this.openai.createChatCompletion({
             model,
             messages: [{role: "user", content: prompt}],
